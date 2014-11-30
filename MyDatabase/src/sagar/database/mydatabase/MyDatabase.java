@@ -62,15 +62,47 @@ public class MyDatabase {
 	public static void main(String[] args) {
 		MyDatabase myDB = new MyDatabase();
 		myDB.readFromCSV();
+		System.out.println("************************************************");
 		System.out.println("1. Select By ID");
 		String id = "1";
 		System.out.println("Given ID:: " + id);
-		System.out.println("Record extracted::\n" + myDB.getRecordByID(id));
+		System.out.println("************************************************");
+		String record = myDB.getRecord(id, myDB.idIndex);
+		if (record.equals(""))
+			System.out.println("Record with ID::" + id + ", does not exist");
+		else
+			System.out.println("Record extracted::\n" + record);
+
+		System.out.println("************************************************");
+		System.out.println("2. Select By Last Name");
+		String lname = "Butt";
+		System.out.println("Given Lastname:: " + lname);
+		System.out.println("************************************************");
+		record = myDB.getRecord(lname, myDB.lnameIndex);
+		if (record.equals(""))
+			System.out.println("Record with Last Name::" + lname
+					+ ", does not exist");
+		else
+			System.out.println("Record extracted::\n" + record);
+		
+		System.out.println("************************************************");
+		System.out.println("2. Select By State");
+		String state = "LA";
+		System.out.println("Given State:: " + state);
+		System.out.println("************************************************");
+		record = myDB.getRecord(state, myDB.stateIndex);
+		if (record.equals(""))
+			System.out.println("Record with State::" + state
+					+ ", does not exist");
+		else
+			System.out.println("Record extracted::\n" + record);
+		
+		System.out.println("************************************************");
 	}
 
-	private String getRecordByID(String id) {
+	private String getRecord(String field, TreeMap<String, ArrayList<Long>> map) {
 		StringBuilder sb = new StringBuilder();
-		ArrayList<Long> offsets = idIndex.get("\"" + id + "\"");
+		ArrayList<Long> offsets = map.get("\"" + field + "\"");
 		try {
 			for (Long offset : offsets) {
 				file.seek(offset);
@@ -128,42 +160,42 @@ public class MyDatabase {
 								.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)")) {
 
 							file.seek(file.length());
-							file.writeUTF(field);
+							file.writeUTF(field.toLowerCase());
 							if (fieldIndex == attributes.indexOf("\"" + ID
 									+ "\"")) {
-								if (idIndex.containsKey(field)) {
+								if (idIndex.containsKey(field.toLowerCase())) {
 									ArrayList<Long> offsets = idIndex
-											.get(field);
+											.get(field.toLowerCase());
 									offsets.add(offset);
-									idIndex.put(field, offsets);
+									idIndex.put(field.toLowerCase(), offsets);
 								} else {
 									ArrayList<Long> offsets = new ArrayList<Long>();
 									offsets.add(offset);
-									idIndex.put(field, offsets);
+									idIndex.put(field.toLowerCase(), offsets);
 								}
 							} else if (fieldIndex == attributes.indexOf("\""
 									+ LNAME + "\"")) {
-								if (lnameIndex.containsKey(field)) {
+								if (lnameIndex.containsKey(field.toLowerCase())) {
 									ArrayList<Long> offsets = lnameIndex
-											.get(field);
+											.get(field.toLowerCase());
 									offsets.add(offset);
-									lnameIndex.put(field, offsets);
+									lnameIndex.put(field.toLowerCase(), offsets);
 								} else {
 									ArrayList<Long> offsets = new ArrayList<Long>();
 									offsets.add(offset);
-									lnameIndex.put(field, offsets);
+									lnameIndex.put(field.toLowerCase(), offsets);
 								}
 							} else if (fieldIndex == attributes.indexOf("\""
 									+ STATE + "\"")) {
-								if (stateIndex.containsKey(field)) {
+								if (stateIndex.containsKey(field.toLowerCase())) {
 									ArrayList<Long> offsets = stateIndex
-											.get(field);
+											.get(field.toLowerCase());
 									offsets.add(offset);
-									stateIndex.put(field, offsets);
+									stateIndex.put(field.toLowerCase(), offsets);
 								} else {
 									ArrayList<Long> offsets = new ArrayList<Long>();
 									offsets.add(offset);
-									stateIndex.put(field, offsets);
+									stateIndex.put(field.toLowerCase(), offsets);
 								}
 							}
 							fieldIndex++;
@@ -197,7 +229,7 @@ public class MyDatabase {
 	}
 
 	/**
-	 * Create hashmap indexes from the index files
+	 * Create treemap indexes from the index files
 	 */
 	private void readIndexes() {
 		Scanner scanner = null;
