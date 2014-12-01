@@ -65,9 +65,12 @@ public class MyDatabase {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Scanner scanner = new Scanner(System.in);
 		MyDatabase myDB = new MyDatabase();
+
+		// Read from CSV input and create data.db
 		myDB.readFromCSV();
+
+		// Select operation
 		System.out.println("************************************************");
 		System.out.println("1a. Select By ID");
 		String id = "6";
@@ -79,8 +82,6 @@ public class MyDatabase {
 		else
 			System.out.println("Record extracted::\n" + record);
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
 		System.out.println("************************************************");
 		System.out.println("1b. Select By Last Name");
 		String lname = "Butt";
@@ -93,8 +94,6 @@ public class MyDatabase {
 		else
 			System.out.println("Record extracted::\n" + record);
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
 		System.out.println("************************************************");
 		System.out.println("1c. Select By State");
 		String state = "LA";
@@ -107,10 +106,8 @@ public class MyDatabase {
 		else
 			System.out.println("Record extracted::\n" + record);
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
+		// Insert Operation
 		System.out.println("************************************************");
-
 		record = "\"1\",\"John\",\"Doe\",\"Benton, John B Jr\",\"6649 N Blue Gum St\",\"New Orleans\",\"Orleans\",\"LA\",70116,\"504-621-8927\",\"504-845-1427\",\"jdoe@gmail.com\",\"http://www.bentonjohnbjr.com\"";
 		System.out.println("2a. Insert duplicate ID record");
 		System.out.println("************************************************");
@@ -119,20 +116,16 @@ public class MyDatabase {
 		else
 			System.out.println("Duplicate record::\n" + record);
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
 		System.out.println("************************************************");
-
 		record = "\"503\",\"John\",\"Doe\",\"Benton, John B Jr\",\"6649 N Blue Gum St\",\"New Orleans\",\"Orleans\",\"LA\",70116,\"504-621-8927\",\"504-845-1427\",\"jbutt@gmail.com\",\"http://www.bentonjohnbjr.com\"";
-		System.out.println("2b. Insert duplicate ID record(EMAIL is not unique)");
+		System.out
+				.println("2b. Insert duplicate ID record(EMAIL is not unique)");
 		System.out.println("************************************************");
 		if (myDB.insert(record))
 			System.out.println("Successfully inserted record::\n" + record);
 		else
 			System.out.println("Duplicate record::\n" + record);
-		
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
+
 		System.out.println("************************************************");
 		record = "\"503\",\"John\",\"Doe\",\"Benton, John B Jr\",\"6649 N Blue Gum St\",\"New Orleans\",\"Orleans\",\"LA\",70116,\"504-621-8927\",\"504-845-1427\",\"jdoe@gmail.com\",\"http://www.bentonjohnbjr.com\"";
 		System.out.println("2c. Insert a record");
@@ -144,10 +137,8 @@ public class MyDatabase {
 		} else
 			System.out.println("Duplicate record::\n" + record);
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
+		// Delete Operation
 		System.out.println("************************************************");
-
 		System.out.println("3a. Delete non-existent record");
 		id = "502";
 		System.out.println("Trying to delete record with ID::" + id);
@@ -161,10 +152,7 @@ public class MyDatabase {
 			myDB.writeIndexes();
 		}
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
 		System.out.println("************************************************");
-
 		System.out.println("3b. Delete existing record");
 		id = "5";
 		System.out.println("Trying to delete record with ID::" + id);
@@ -178,10 +166,8 @@ public class MyDatabase {
 			myDB.writeIndexes();
 		}
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
+		// Modify/Update operation
 		System.out.println("************************************************");
-
 		System.out.println("4a. Modify non-existent record");
 		id = "502";
 		String field_name = "phone1";
@@ -196,8 +182,6 @@ public class MyDatabase {
 			System.out.println("Successfully modified record::\n" + record);
 		}
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
 		System.out.println("************************************************");
 		System.out.println("4b. Modify existing record");
 		id = "2";
@@ -215,8 +199,6 @@ public class MyDatabase {
 		else
 			System.out.println("Successfully modified record::\n" + record);
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
 		System.out.println("************************************************");
 		System.out
 				.println("4c. Modify existing record with new value bigger than old value");
@@ -232,57 +214,119 @@ public class MyDatabase {
 		else if (record.equals("-1"))
 			System.out.println(new_value + " cannot be larger than old "
 					+ field_name + " value");
-		else
+		else if (record.equals("-2"))
+			System.out.println(new_value
+					+ " is already an ID of another record");
+		else {
 			System.out.println("Successfully modified record::\n" + record);
+			myDB.deleteIndexes();
+			myDB.writeIndexes();
+		}
 
-		System.out.println("Press \"Enter\" to continue...");
-		scanner.nextLine();
+		// Count operation
 		System.out.println("************************************************");
 		System.out.println("5. Number of records currently in the database:: "
 				+ myDB.count());
 		System.out.println("************************************************");
 
-		scanner.close();
 	}
 
+	/**
+	 * Count operation
+	 * 
+	 * @return
+	 */
 	private int count() {
 		return idIndex.size();
 	}
 
+	/**
+	 * Modify/Update operation
+	 * 
+	 * @param id
+	 * @param field_name
+	 * @param new_value
+	 * @return
+	 */
 	private String modify(String id, String field_name, String new_value) {
 		String record = select(id, idIndex);
-		if (record != null && record.length() > 0) {
-			long offset = idIndex.get("\"" + id + "\"").get(0);
-			try {
-				file.seek(offset);
-				for (String fields : record.split("\n")) {
-					String field = fields.split("::")[0];
-					String fieldValue = fields.split("::")[1];
+		if (field_name.contains(ID)
+				&& idIndex.containsKey("\"" + new_value + "\"")) {
+			record = "-2";
+		} else {
+			if (record != null && record.length() > 0) {
+				long offset = idIndex.get("\"" + id + "\"").get(0);
+				try {
+					file.seek(offset);
+					for (String fields : record.split("\t")) {
+						String field = fields.split("::")[0];
+						String fieldValue = fields.split("::")[1];
 
-					if (field.equalsIgnoreCase("\"" + field_name + "\"")) {
-						new_value = "\"" + new_value + "\"";
-						if (new_value.length() <= fieldValue.length()) {
-							for (int i = new_value.length(); i < fieldValue
-									.length(); i++) {
-								new_value = new_value + " ";
+						if (field.equalsIgnoreCase("\"" + field_name + "\"")) {
+							if (field_name.contains(ID)) {
+								ArrayList<Long> offsets = idIndex
+										.get(fieldValue);
+								offsets.remove(offset);
+								if (offsets.size() == 0)
+									idIndex.remove(fieldValue);
+								else
+									idIndex.put(fieldValue, offsets);
+							} else if (field_name.contains(LNAME)) {
+								ArrayList<Long> offsets = lnameIndex
+										.get(fieldValue);
+								offsets.remove(offset);
+								if (offsets.size() == 0)
+									lnameIndex.remove(fieldValue);
+								else
+									lnameIndex.put(fieldValue, offsets);
+							} else if (field_name.contains(STATE)) {
+								ArrayList<Long> offsets = stateIndex
+										.get(fieldValue);
+								offsets.remove(offset);
+								if (offsets.size() == 0)
+									stateIndex.remove(fieldValue);
+								else
+									stateIndex.put(fieldValue, offsets);
+							} else if (field_name.contains(EMAIL)) {
+								ArrayList<Long> offsets = emailIndex
+										.get(fieldValue);
+								offsets.remove(offset);
+								if (offsets.size() == 0)
+									emailIndex.remove(fieldValue);
+								else
+									emailIndex.put(fieldValue, offsets);
 							}
-							file.writeUTF(new_value);
-						} else {
 
-							record = "-1";
+							new_value = "\"" + new_value + "\"";
+							if (new_value.length() <= fieldValue.length()) {
+								for (int i = new_value.length(); i < fieldValue
+										.length(); i++) {
+									new_value = new_value + " ";
+								}
+								file.writeUTF(new_value);
+							} else {
+
+								record = "-1";
+							}
+							break;
 						}
-						break;
-					}
 
-					file.readUTF();
+						file.readUTF();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 		return record;
 	}
 
+	/**
+	 * Delete operation
+	 * 
+	 * @param id
+	 * @return
+	 */
 	private String delete(String id) {
 		String record = select(id, idIndex);
 		if (record != null && record.length() > 0) {
@@ -290,7 +334,7 @@ public class MyDatabase {
 			try {
 				file.seek(offset);
 				idIndex.remove("\"" + id + "\"");
-				for (String fields : record.split("\n")) {
+				for (String fields : record.split("\t")) {
 					String field = fields.split("::")[0];
 					String fieldValue = fields.split("::")[1];
 					if (field.equalsIgnoreCase("\"" + LNAME + "\"")) {
@@ -307,6 +351,13 @@ public class MyDatabase {
 							stateIndex.remove(fieldValue);
 						else
 							stateIndex.put(fieldValue, offsets);
+					} else if (field.equalsIgnoreCase("\"" + EMAIL + "\"")) {
+						ArrayList<Long> offsets = emailIndex.get(fieldValue);
+						offsets.remove(offset);
+						if (offsets.size() == 0)
+							emailIndex.remove(fieldValue);
+						else
+							emailIndex.put(fieldValue, offsets);
 					}
 
 					String string = new String();
@@ -323,6 +374,12 @@ public class MyDatabase {
 		return record;
 	}
 
+	/**
+	 * Insert operation
+	 * 
+	 * @param record
+	 * @return
+	 */
 	private boolean insert(String record) {
 		Scanner scanner = null;
 		try {
@@ -361,6 +418,15 @@ public class MyDatabase {
 					} else {
 						stateIndex.put(field.toLowerCase(), offsets);
 					}
+				} else if (fieldCounter == attributes.indexOf("\"" + EMAIL
+						+ "\"")) {
+					if (emailIndex.containsKey(field.toLowerCase())) {
+						offsets = emailIndex.get(field.toLowerCase());
+						offsets.add(offset);
+						emailIndex.put(field.toLowerCase(), offsets);
+					} else {
+						emailIndex.put(field.toLowerCase(), offsets);
+					}
 				}
 				fieldCounter++;
 			}
@@ -373,6 +439,13 @@ public class MyDatabase {
 		return true;
 	}
 
+	/**
+	 * Select Operation
+	 * 
+	 * @param field
+	 * @param map
+	 * @return
+	 */
 	private String select(String field, TreeMap<String, ArrayList<Long>> map) {
 		StringBuilder sb = new StringBuilder();
 		ArrayList<Long> offsets = map.get("\"" + field.toLowerCase() + "\"");
@@ -383,11 +456,12 @@ public class MyDatabase {
 					for (String attribute : attributes) {
 						if (file.getFilePointer() <= file.length()) {
 							sb.append(attribute + "::");
-							sb.append(file.readUTF() + "\n");
+							sb.append(file.readUTF() + "\t");
 						}
 					}
 					sb.append("\n");
 				}
+				sb.delete(sb.length() - 2, sb.length());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -395,6 +469,9 @@ public class MyDatabase {
 		return sb.toString();
 	}
 
+	/**
+	 * Delete the index files
+	 */
 	public void deleteIndexes() {
 		try {
 			if (idFile != null)
@@ -427,7 +504,7 @@ public class MyDatabase {
 	}
 
 	/**
-	 * Get the data from csv. And create data.db as the database. Also create
+	 * Get the data from CSV. And create data.db as the database. Also create
 	 * index files based on id, last_name and state fields. Create only if not
 	 * already created.
 	 */
@@ -528,6 +605,9 @@ public class MyDatabase {
 		}
 	}
 
+	/**
+	 * Set the field names from CSV
+	 */
 	private void setAttributes() {
 		Scanner scanner = new Scanner(getClass().getClassLoader()
 				.getResourceAsStream(INPUTCSV));
@@ -541,7 +621,7 @@ public class MyDatabase {
 	}
 
 	/**
-	 * Create treemap indexes from the index files
+	 * Create treeMap indexes from the index files
 	 */
 	private void readIndexes() {
 		Scanner scanner = null;
@@ -646,7 +726,7 @@ public class MyDatabase {
 	}
 
 	/**
-	 * Create index files
+	 * Create index files from treeMaps
 	 */
 	private void writeIndexes() {
 		try {
