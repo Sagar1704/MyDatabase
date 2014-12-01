@@ -24,11 +24,13 @@ public class MyDatabase {
 	private PrintWriter idFile;
 	private PrintWriter lnameFile;
 	private PrintWriter stateFile;
+	private PrintWriter emailFile;
 
 	private ArrayList<String> attributes;
 	private TreeMap<String, ArrayList<Long>> idIndex;
 	private TreeMap<String, ArrayList<Long>> lnameIndex;
 	private TreeMap<String, ArrayList<Long>> stateIndex;
+	private TreeMap<String, ArrayList<Long>> emailIndex;
 
 	private static final String INPUTCSV = "us-500.csv";
 	private static final String SRC = "src/";
@@ -36,6 +38,7 @@ public class MyDatabase {
 	private static final String ID = "id";
 	private static final String LNAME = "last_name";
 	private static final String STATE = "state";
+	private static final String EMAIL = "email";
 	private static final String INDEX = ".ndx";
 	private static final String REGEX = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
 
@@ -55,6 +58,7 @@ public class MyDatabase {
 				});
 		this.lnameIndex = new TreeMap<String, ArrayList<Long>>();
 		this.stateIndex = new TreeMap<String, ArrayList<Long>>();
+		this.emailIndex = new TreeMap<String, ArrayList<Long>>();
 	}
 
 	/**
@@ -118,8 +122,20 @@ public class MyDatabase {
 		System.out.println("Press \"Enter\" to continue...");
 		scanner.nextLine();
 		System.out.println("************************************************");
-		record = "\"501\",\"John\",\"Doe\",\"Benton, John B Jr\",\"6649 N Blue Gum St\",\"New Orleans\",\"Orleans\",\"LA\",70116,\"504-621-8927\",\"504-845-1427\",\"jdoe@gmail.com\",\"http://www.bentonjohnbjr.com\"";
-		System.out.println("2b. Insert a record");
+
+		record = "\"503\",\"John\",\"Doe\",\"Benton, John B Jr\",\"6649 N Blue Gum St\",\"New Orleans\",\"Orleans\",\"LA\",70116,\"504-621-8927\",\"504-845-1427\",\"jbutt@gmail.com\",\"http://www.bentonjohnbjr.com\"";
+		System.out.println("2b. Insert duplicate ID record(EMAIL is not unique)");
+		System.out.println("************************************************");
+		if (myDB.insert(record))
+			System.out.println("Successfully inserted record::\n" + record);
+		else
+			System.out.println("Duplicate record::\n" + record);
+		
+		System.out.println("Press \"Enter\" to continue...");
+		scanner.nextLine();
+		System.out.println("************************************************");
+		record = "\"503\",\"John\",\"Doe\",\"Benton, John B Jr\",\"6649 N Blue Gum St\",\"New Orleans\",\"Orleans\",\"LA\",70116,\"504-621-8927\",\"504-845-1427\",\"jdoe@gmail.com\",\"http://www.bentonjohnbjr.com\"";
+		System.out.println("2c. Insert a record");
 		System.out.println("************************************************");
 		if (myDB.insert(record)) {
 			System.out.println("Successfully inserted record::\n" + record);
@@ -225,7 +241,7 @@ public class MyDatabase {
 		System.out.println("5. Number of records currently in the database:: "
 				+ myDB.count());
 		System.out.println("************************************************");
-		
+
 		scanner.close();
 	}
 
@@ -310,7 +326,10 @@ public class MyDatabase {
 	private boolean insert(String record) {
 		Scanner scanner = null;
 		try {
-			if (idIndex.containsKey(record.split(REGEX)[0]))
+			if (idIndex.containsKey(record.split(REGEX)[attributes.indexOf("\""
+					+ ID + "\"")])
+					|| emailIndex.containsKey(record.split(REGEX)[attributes
+							.indexOf("\"" + EMAIL + "\"")]))
 				return false;
 			int fieldCounter = 0;
 			ArrayList<Long> offsets = new ArrayList<Long>();
@@ -395,6 +414,12 @@ public class MyDatabase {
 
 			path = Paths.get(SRC + STATE + INDEX);
 			Files.delete(path);
+
+			if (emailFile != null)
+				emailFile.close();
+
+			path = Paths.get(SRC + EMAIL + INDEX);
+			Files.delete(path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -468,6 +493,20 @@ public class MyDatabase {
 									ArrayList<Long> offsets = new ArrayList<Long>();
 									offsets.add(offset);
 									stateIndex
+											.put(field.toLowerCase(), offsets);
+								}
+							} else if (fieldIndex == attributes.indexOf("\""
+									+ EMAIL + "\"")) {
+								if (emailIndex.containsKey(field.toLowerCase())) {
+									ArrayList<Long> offsets = emailIndex
+											.get(field.toLowerCase());
+									offsets.add(offset);
+									emailIndex
+											.put(field.toLowerCase(), offsets);
+								} else {
+									ArrayList<Long> offsets = new ArrayList<Long>();
+									offsets.add(offset);
+									emailIndex
 											.put(field.toLowerCase(), offsets);
 								}
 							}
@@ -576,6 +615,29 @@ public class MyDatabase {
 				}
 			}
 
+			scanner = new Scanner(new File(SRC + EMAIL + INDEX));
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				boolean first = true;
+				String email = "";
+				for (String string : line.split(";")) {
+					if (first) {
+						email = string;
+						first = false;
+					} else {
+						if (emailIndex.containsKey(email)) {
+							ArrayList<Long> offsets = emailIndex.get(email);
+							offsets.add(Long.parseLong(string));
+							emailIndex.put(email, offsets);
+						} else {
+							ArrayList<Long> offsets = new ArrayList<Long>();
+							offsets.add(Long.parseLong(string));
+							emailIndex.put(email, offsets);
+						}
+					}
+				}
+			}
+
 			System.out
 					.println("Generated indexes from the already created database and index files");
 		} catch (Exception e) {
@@ -626,6 +688,17 @@ public class MyDatabase {
 			}
 
 			// System.out.println("Created State index");
+
+			emailFile = new PrintWriter(new File(SRC + EMAIL + INDEX), "UTF-8");
+
+			for (String email : emailIndex.keySet()) {
+				emailFile.print(email);
+				for (Long offset : emailIndex.get(email)) {
+					emailFile.print(';');
+					emailFile.print(offset);
+				}
+				emailFile.println();
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -634,6 +707,7 @@ public class MyDatabase {
 			idFile.close();
 			lnameFile.close();
 			stateFile.close();
+			emailFile.close();
 		}
 	}
 }
