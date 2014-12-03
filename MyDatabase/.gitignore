@@ -1,1 +1,6 @@
 /bin/
+/data.db
+/email.ndx
+/id.ndx
+/last_name.ndx
+/state.ndx
