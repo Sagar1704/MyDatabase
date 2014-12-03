@@ -30,7 +30,6 @@ public class MyDatabase {
 	private TreeMap<String, ArrayList<Long>> emailIndex;
 
 	private static final String INPUTCSV = "us-500.csv";
-//	private static final String SRC = "src/";
 	private static final String DATABASE = "data.db";
 	private static final String ID = "id";
 	private static final String LNAME = "last_name";
@@ -473,10 +472,6 @@ public class MyDatabase {
 		if (idFile != null)
 			idFile.close();
 
-		/*String filePath = getClass().getClassLoader()
-				.getResource(ID + INDEX).getPath();
-		Path path = Paths.get(SRC + filePath);
-		Files.delete(path);*/
 		File idIndexFile = new File(ID + INDEX);
 		idIndexFile.delete();
 		
@@ -486,20 +481,12 @@ public class MyDatabase {
 		File lnameIndexFile = new File(LNAME + INDEX);
 		lnameIndexFile.delete();
 
-		/*path = Paths.get(SRC + getClass().getClassLoader()
-				.getResource(LNAME + INDEX).getPath());
-		Files.delete(path);*/
-
 		if (stateFile != null)
 			stateFile.close();
 
 		File stateIndexFile = new File(STATE + INDEX);
 		stateIndexFile.delete();
 		
-		/*path = Paths.get(SRC + getClass().getClassLoader()
-				.getResource(STATE + INDEX).getPath());
-		Files.delete(path);*/
-
 		if (emailFile != null)
 			emailFile.close();
 
@@ -516,11 +503,9 @@ public class MyDatabase {
 	private void readFromCSV() {
 		boolean first = true;
 		Scanner scanner = null;
-//		File database = null;
 		try {
 			scanner = new Scanner(getClass().getClassLoader()
 					.getResourceAsStream(INPUTCSV));
-//			database = new File(SRC + DATABASE);
 			file = new RandomAccessFile(DATABASE, "rw");
 			if (file.length() == 0) {
 				while (scanner.hasNextLine()) {
@@ -751,8 +736,6 @@ public class MyDatabase {
 				idFile.println();
 			}
 
-			// System.out.println("Created ID index");
-
 			File lnameIndexFile = new File(LNAME + INDEX);
 			lnameFile = new PrintWriter(lnameIndexFile, "UTF-8");
 
@@ -765,8 +748,6 @@ public class MyDatabase {
 				lnameFile.println();
 			}
 
-			// System.out.println("Created Last Name index");
-
 			File stateIndexFile = new File(STATE + INDEX);
 			stateFile = new PrintWriter(stateIndexFile, "UTF-8");
 
@@ -778,8 +759,6 @@ public class MyDatabase {
 				}
 				stateFile.println();
 			}
-
-			// System.out.println("Created State index");
 
 			File emailIndexFile = new File(EMAIL + INDEX);
 			emailFile = new PrintWriter(emailIndexFile, "UTF-8");
