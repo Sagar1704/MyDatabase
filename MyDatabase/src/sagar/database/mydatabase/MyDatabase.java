@@ -5,9 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Scanner;
@@ -33,7 +30,7 @@ public class MyDatabase {
 	private TreeMap<String, ArrayList<Long>> emailIndex;
 
 	private static final String INPUTCSV = "us-500.csv";
-	private static final String SRC = "src/";
+//	private static final String SRC = "src/";
 	private static final String DATABASE = "data.db";
 	private static final String ID = "id";
 	private static final String LNAME = "last_name";
@@ -473,33 +470,41 @@ public class MyDatabase {
 	 * Delete the index files
 	 */
 	public void deleteIndexes() {
-		try {
-			if (idFile != null)
-				idFile.close();
+		if (idFile != null)
+			idFile.close();
 
-			Path path = Paths.get(SRC + ID + INDEX);
-			Files.delete(path);
+		/*String filePath = getClass().getClassLoader()
+				.getResource(ID + INDEX).getPath();
+		Path path = Paths.get(SRC + filePath);
+		Files.delete(path);*/
+		File idIndexFile = new File(ID + INDEX);
+		idIndexFile.delete();
+		
+		if (lnameFile != null)
+			lnameFile.close();
+		
+		File lnameIndexFile = new File(LNAME + INDEX);
+		lnameIndexFile.delete();
 
-			if (lnameFile != null)
-				lnameFile.close();
+		/*path = Paths.get(SRC + getClass().getClassLoader()
+				.getResource(LNAME + INDEX).getPath());
+		Files.delete(path);*/
 
-			path = Paths.get(SRC + LNAME + INDEX);
-			Files.delete(path);
+		if (stateFile != null)
+			stateFile.close();
 
-			if (stateFile != null)
-				stateFile.close();
+		File stateIndexFile = new File(STATE + INDEX);
+		stateIndexFile.delete();
+		
+		/*path = Paths.get(SRC + getClass().getClassLoader()
+				.getResource(STATE + INDEX).getPath());
+		Files.delete(path);*/
 
-			path = Paths.get(SRC + STATE + INDEX);
-			Files.delete(path);
+		if (emailFile != null)
+			emailFile.close();
 
-			if (emailFile != null)
-				emailFile.close();
-
-			path = Paths.get(SRC + EMAIL + INDEX);
-			Files.delete(path);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		File emailIndexFile = new File(EMAIL + INDEX);
+		emailIndexFile.delete();
 
 	}
 
@@ -511,12 +516,12 @@ public class MyDatabase {
 	private void readFromCSV() {
 		boolean first = true;
 		Scanner scanner = null;
-		File database = null;
+//		File database = null;
 		try {
 			scanner = new Scanner(getClass().getClassLoader()
 					.getResourceAsStream(INPUTCSV));
-			database = new File(SRC + DATABASE);
-			file = new RandomAccessFile(database, "rw");
+//			database = new File(SRC + DATABASE);
+			file = new RandomAccessFile(DATABASE, "rw");
 			if (file.length() == 0) {
 				while (scanner.hasNextLine()) {
 					String line = scanner.nextLine();
@@ -626,7 +631,8 @@ public class MyDatabase {
 	private void readIndexes() {
 		Scanner scanner = null;
 		try {
-			scanner = new Scanner(new File(SRC + ID + INDEX));
+			scanner = new Scanner(getClass().getClassLoader()
+					.getResourceAsStream(ID + INDEX));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				boolean first = true;
@@ -649,7 +655,8 @@ public class MyDatabase {
 				}
 			}
 
-			scanner = new Scanner(new File(SRC + LNAME + INDEX));
+			scanner = new Scanner(getClass().getClassLoader()
+					.getResourceAsStream(LNAME + INDEX));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				boolean first = true;
@@ -672,7 +679,8 @@ public class MyDatabase {
 				}
 			}
 
-			scanner = new Scanner(new File(SRC + STATE + INDEX));
+			scanner = new Scanner(getClass().getClassLoader()
+					.getResourceAsStream(STATE + INDEX));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				boolean first = true;
@@ -695,7 +703,8 @@ public class MyDatabase {
 				}
 			}
 
-			scanner = new Scanner(new File(SRC + EMAIL + INDEX));
+			scanner = new Scanner(getClass().getClassLoader()
+					.getResourceAsStream(EMAIL + INDEX));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				boolean first = true;
@@ -730,7 +739,8 @@ public class MyDatabase {
 	 */
 	private void writeIndexes() {
 		try {
-			idFile = new PrintWriter(new File(SRC + ID + INDEX), "UTF-8");
+			File idIndexFile = new File(ID + INDEX);
+			idFile = new PrintWriter(idIndexFile, "UTF-8");
 
 			for (String id : idIndex.keySet()) {
 				idFile.print(id);
@@ -743,7 +753,8 @@ public class MyDatabase {
 
 			// System.out.println("Created ID index");
 
-			lnameFile = new PrintWriter(new File(SRC + LNAME + INDEX), "UTF-8");
+			File lnameIndexFile = new File(LNAME + INDEX);
+			lnameFile = new PrintWriter(lnameIndexFile, "UTF-8");
 
 			for (String lname : lnameIndex.keySet()) {
 				lnameFile.print(lname);
@@ -756,7 +767,8 @@ public class MyDatabase {
 
 			// System.out.println("Created Last Name index");
 
-			stateFile = new PrintWriter(new File(SRC + STATE + INDEX), "UTF-8");
+			File stateIndexFile = new File(STATE + INDEX);
+			stateFile = new PrintWriter(stateIndexFile, "UTF-8");
 
 			for (String state : stateIndex.keySet()) {
 				stateFile.print(state);
@@ -769,7 +781,8 @@ public class MyDatabase {
 
 			// System.out.println("Created State index");
 
-			emailFile = new PrintWriter(new File(SRC + EMAIL + INDEX), "UTF-8");
+			File emailIndexFile = new File(EMAIL + INDEX);
+			emailFile = new PrintWriter(emailIndexFile, "UTF-8");
 
 			for (String email : emailIndex.keySet()) {
 				emailFile.print(email);
